@@ -135,6 +135,17 @@ namespace OneLogin
                 XmlNode node = xmlDoc.SelectSingleNode("/samlp:Response/saml:Assertion/saml:Subject/saml:NameID",manager);
                 return node.InnerText;
             }
+            public string GetAll()
+            {
+                XmlNamespaceManager manager = new XmlNamespaceManager(xmlDoc.NameTable);
+                manager.AddNamespace("ds", SignedXml.XmlDsigNamespaceUrl);
+                manager.AddNamespace("saml", "urn:oasis:names:tc:SAML:2.0:assertion");
+                manager.AddNamespace("samlp", "urn:oasis:names:tc:SAML:2.0:protocol");
+                
+                XmlNode node = xmlDoc.SelectSingleNode("/samlp:Response/saml:Assertion",manager);
+                return HttpUtility.HtmlEncode(node.InnerXml);
+            }
+
 	    }
 
         public class AuthRequest
