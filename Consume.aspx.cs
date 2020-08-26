@@ -30,10 +30,10 @@ public partial class _Default : System.Web.UI.Page
 
         if (samlResponse.IsValid())
         {
-            Response.Write("OK!<BR>");
-            Response.Write("Name ID:");
+		
+            Response.Write("<b>Name ID:</b><BR>");
             Response.Write(samlResponse.GetNameID());
-            Response.Write("<BR>SAML data:<BR>");
+            Response.Write("<BR><b>SAML data:</b><BR>");
             Response.Write(samlResponse.GetAll().Replace("&gt;&lt;","&gt;<BR>&lt;"));
             Response.Write("<BR>");
 
