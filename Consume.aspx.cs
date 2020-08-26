@@ -13,6 +13,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
 using System.Xml;
 
+
+using System.Web.Script.Serialization;
+
 using OneLogin.Saml;
 
 public partial class _Default : System.Web.UI.Page 
@@ -27,8 +30,13 @@ public partial class _Default : System.Web.UI.Page
 
         if (samlResponse.IsValid())
         {
-            Response.Write("OK!");
+            Response.Write("OK!<BR>");
+            Response.Write("Name ID:");
             Response.Write(samlResponse.GetNameID());
+            Response.Write("<BR>SAML data:<BR>");
+            Response.Write(samlResponse.GetAll().Replace("&gt;&lt;","&gt;<BR>&lt;"));
+            Response.Write("<BR>");
+
         }
         else
         {
