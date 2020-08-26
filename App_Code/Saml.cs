@@ -7,6 +7,9 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Web.UI.WebControls.WebParts;
 using System.Web.UI.HtmlControls;
+using System.IO.Compression;
+using System.Text;
+
 
 using System.IO;
 using System.Xml;
@@ -190,7 +193,16 @@ namespace OneLogin
                         xw.WriteEndElement();
 
                         xw.WriteStartElement("samlp", "NameIDPolicy", "urn:oasis:names:tc:SAML:2.0:protocol");
-                        xw.WriteAttributeString("Format", "urn:oasis:names:tc:SAML:2.0:nameid-format:unspecified");
+                        xw.WriteAttributeString("Format", "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"); // This value permits Azure Active Directory to select the claim format. Azure Active Directory issues the NameID as a pairwise identifier.
+						/* Other format options:
+						
+                        xw.WriteAttributeString("Format", "urn:oasis:names:tc:SAML:2.0:nameid-format:unspecified"); //For non Azure AD IdP's, like Idaptive
+                        xw.WriteAttributeString("Format", "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent"); // Azure Active Directory issues the NameID claim as a pairwise identifier
+                        xw.WriteAttributeString("Format", "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"); // Azure Active Directory issues the NameID claim in e-mail address format.
+                        xw.WriteAttributeString("Format", "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"); //Azure Active Directory issues the NameID claim as a randomly generated value that is unique to the current SSO operation. This means that the value is temporary and cannot be used to identify the authenticating user.
+						
+						//Read more about Azure AD requirements at: https://docs.microsoft.com/en-us/azure/active-directory/develop/single-sign-on-saml-protocol
+						*/
                         xw.WriteAttributeString("AllowCreate", "true");
                         xw.WriteEndElement();
 
@@ -206,11 +218,23 @@ namespace OneLogin
                         xw.WriteEndElement();
                     }
 
-                    if (format == AuthRequestFormat.Base64)
-                    {
-                        byte[] toEncodeAsBytes = System.Text.ASCIIEncoding.ASCII.GetBytes(sw.ToString());
-                        return System.Convert.ToBase64String(toEncodeAsBytes);
-                    }
+					    if (format == AuthRequestFormat.Base64)
+    {
+        /*COMMENTED THIS OUT, olny Base64 encoding*/
+
+        //                byte[] toEncodeAsBytes = System.Text.ASCIIEncoding.ASCII.GetBytes(sw.ToString());
+        //                return System.Convert.ToBase64String(toEncodeAsBytes);
+
+        /*ADDED THIS for Deflate functionality (required by Azure AD)*/
+
+        MemoryStream memoryStream = new MemoryStream();
+        StreamWriter writer = new StreamWriter(new DeflateStream(memoryStream, CompressionMode.Compress, true), new UTF8Encoding(false));
+        writer.Write(sw.ToString());
+        writer.Close();
+        string result = Convert.ToBase64String(memoryStream.GetBuffer(), 0, (int)memoryStream.Length, Base64FormattingOptions.None);
+        return result;
+    }
+					
 
                     return null;
                 }
